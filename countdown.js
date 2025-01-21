@@ -1,9 +1,16 @@
-// Countdown logic
 (function () {
-  const endDate = new Date();
-  endDate.setHours(endDate.getHours() + 24); // Default: 24 hours
+  // Set dates for the counters
+  const startDate = new Date('2025-01-20T17:00:00Z'); // 12:00 PM EST in UTC
+  const durationInHours = 24; // Duration for Ukraine countdown
+  const endDate = new Date(startDate.getTime() + durationInHours * 60 * 60 * 1000);
 
+  const presidencyEndDate = new Date('2029-01-20T17:00:00Z'); // End of Trump's presidency
+
+  // DOM elements
   const timerElement = document.getElementById("timer");
+  const labelElement = document.getElementById("countdown-label");
+  const presidencyTimerElement = document.getElementById("presidency-timer");
+  const presidencyLabelElement = document.getElementById("presidency-label");
   const quoteElement = document.getElementById("quote");
 
   // Trump-related quotes
@@ -15,14 +22,15 @@
     { text: "This war could end tomorrow if we had the right leadership.", source: "Truth Social Post, April 2023" },
   ];
 
-  // Randomly select a quote
+  // Function to display a random Trump quote
   function displayRandomQuote() {
     const randomIndex = Math.floor(Math.random() * quotes.length);
     const quote = quotes[randomIndex];
     quoteElement.innerText = `"${quote.text}" — ${quote.source}`;
   }
 
-  function updateTimer() {
+  // Function to calculate and display the Ukraine countdown
+  function updateUkraineCountdown() {
     const now = new Date();
     const timeLeft = endDate - now;
 
@@ -31,15 +39,51 @@
       const minutes = Math.floor((timeLeft / (1000 * 60)) % 60);
       const seconds = Math.floor((timeLeft / 1000) % 60);
 
-      timerElement.innerText = `${hours}h ${minutes}m ${seconds}s`;
+      timerElement.innerText = `${hours}h ${minutes}m ${seconds}s remaining`;
+      timerElement.style.color = "green";
     } else {
-      timerElement.innerText = "Time's up! Is the war over?";
-      clearInterval(timerInterval);
+      const timeElapsed = Math.abs(timeLeft);
+      const hours = Math.floor((timeElapsed / (1000 * 60 * 60)) % 24);
+      const minutes = Math.floor((timeElapsed / (1000 * 60)) % 60);
+      const seconds = Math.floor((timeElapsed / 1000) % 60);
+      const days = Math.floor(timeElapsed / (1000 * 60 * 60 * 24));
+
+      timerElement.innerText = `${days}d ${hours}h ${minutes}m ${seconds}s since deadline`;
+      timerElement.style.color = "red";
+      labelElement.innerText = "Trump2's Countdown Deadline Missed!";
     }
   }
 
-  // Run the timer and quote updater
-  const timerInterval = setInterval(updateTimer, 1000);
-  updateTimer();
+  // Function to calculate and display the presidency countdown
+  function updatePresidencyCountdown() {
+    const now = new Date();
+    const timeLeft = presidencyEndDate - now;
+
+    if (timeLeft > 0) {
+      const days = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((timeLeft / (1000 * 60 * 60)) % 24);
+      const minutes = Math.floor((timeLeft / (1000 * 60)) % 60);
+      const seconds = Math.floor((timeLeft / 1000) % 60);
+
+      presidencyTimerElement.innerText = `${days}d ${hours}h ${minutes}m ${seconds}s remaining`;
+      presidencyTimerElement.style.color = "blue";
+    } else {
+      presidencyTimerElement.innerText = "Trump's Presidency is Over!";
+      presidencyTimerElement.style.color = "gray";
+      presidencyLabelElement.innerText = "Presidency Countdown Completed!";
+    }
+  }
+
+  // Start the timers
+  setInterval(() => {
+    updateUkraineCountdown();
+    updatePresidencyCountdown();
+  }, 1000);
+
+  // Rotate quotes every X minutes (e.g., 5 minutes)
+  const QUOTE_INTERVAL = 5 * 60 * 1000; // 5 minutes in milliseconds
+  setInterval(displayRandomQuote, QUOTE_INTERVAL);
+
+  // Initialize the first quote and timers
   displayRandomQuote();
 })();
